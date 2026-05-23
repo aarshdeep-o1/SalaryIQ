@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalaryIQ — Fresh Graduate Salary Predictor</title>
+    <!-- Google Fonts Preconnect and Links -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet with Cache Buster -->
+    <link rel="stylesheet" href="style.css?v=2.0.1">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <a href="#" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-gem"></i>
+                </div>
+                <h1 class="brand-logo-text">Salary<span>IQ</span></h1>
+            </a>
+            
+            <div class="header-actions-group">
+                <!-- Theme Toggle Button -->
+                <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Switch Light/Dark Theme">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+                
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-grid">
+            
+            <!-- Section 1 — Profile Input Form (Left Column) -->
+            <section class="form-panel glass-panel">
+                <h2>Profile Analyzer</h2>
+                <p class="subtitle">Enter your academic details and skillsets to forecast your potential starting salary.</p>
+
+                <form id="salaryForm" onsubmit="event.preventDefault(); calculateSalary();">
+                    
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="gradName">Full Name</label>
+                        <div class="text-input-wrapper">
+                            <input type="text" id="gradName" class="text-input" placeholder="e.g. Alex Mercer" required autocomplete="off">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                    </div>
+
+                    <!-- LinkedIn / GitHub URL Field -->
+                    <div class="form-group">
+                        <label for="profileUrl">Your LinkedIn / GitHub Profile URL</label>
+                        <div class="text-input-wrapper">
+                            <input type="url" id="profileUrl" class="text-input" placeholder="e.g. https://linkedin.com/in/username" autocomplete="off">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                    </div>
+
+                    <!-- Resume Upload (PDF/DOC) -->
+                    <div class="form-group">
+                        <label>Upload Resume (PDF/DOC)</label>
+                        <div class="file-upload-wrapper">
+                            <label class="btn-file-upload">
+                                <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" onchange="handleResumeUpload(this)" style="display: none;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span id="uploadBtnText">Choose Resume File</span>
+                            </label>
+                            <div class="file-confirm-badge" id="fileConfirmBadge" style="display: none;">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span id="fileConfirmText">Resume received ✓</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- College Tier -->
+                    <div class="form-group">
+                        <label>College Tier</label>
+                        <div class="tier-grid">
+                            <label class="tier-tile">
+                                <input type="radio" name="collegeTier" value="IIT" checked>
+                                <div class="tile-content">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                    <span class="title">Tier 1 Elite</span>
+                                    <span class="desc">IITs, BITS, IISc</span>
+                                </div>
+                            </label>
+                            <label class="tier-tile">
+                                <input type="radio" name="collegeTier" value="NIT">
+                                <div class="tile-content">
+                                    <i class="fa-solid fa-award"></i>
+                                    <span class="title">Tier 1 Quality</span>
+                                    <span class="desc">NITs, DTU, IIITs</span>
+                                </div>
+                            </label>
+                            <label class="tier-tile">
+                                <input type="radio" name="collegeTier" value="State">
+                                <div class="tile-content">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                    <span class="title">Tier 2 State</span>
+                                    <span class="desc">State Govt Colleges</span>
+                                </div>
+                            </label>
+                            <label class="tier-tile">
+                                <input type="radio" name="collegeTier" value="Private">
+                                <div class="tile-content">
+                                    <i class="fa-solid fa-school"></i>
+                                    <span class="title">Tier 3 Private</span>
+                                    <span class="desc">Private Universities</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- CGPA Slider (0-10) -->
+                    <div class="form-group">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <label for="cgpaSlider">CGPA Score</label>
+                                <span class="slider-val-bubble" id="cgpaValue">8.5</span>
+                            </div>
+                            <div class="slider-track-wrapper">
+                                <input type="range" id="cgpaSlider" class="slider-input" min="0.0" max="10.0" step="0.1" value="8.5" oninput="updateCGPABubble(this.value)">
+                            </div>
+                            <div class="slider-labels">
+                                <span>0.0 (Fail)</span>
+                                <span>7.5 (Avg)</span>
+                                <span>10.0 (Perfect)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preferred Tech City -->
+                    <div class="form-group">
+                        <label for="locationSelect">Work Location Premium</label>
+                        <div class="select-wrapper">
+                            <select id="locationSelect" class="custom-select" required>
+                                <option value="Bangalore">Bangalore (Silicon Valley) — High Premium</option>
+                                <option value="Hyderabad">Hyderabad (Tech Hub) — High Premium</option>
+                                <option value="Mumbai">Mumbai / Delhi NCR — High Premium</option>
+                                <option value="Pune">Pune — Moderate Premium</option>
+                                <option value="Chennai">Chennai — Moderate Premium</option>
+                                <option value="Tier2">Tier-2 Cities (Ahmedabad, Jaipur, etc.) — Standard</option>
+                            </select>
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                    </div>
+
+                    <!-- Projects Slider (0-10) -->
+                    <div class="form-group">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <label for="projectsSlider">Academic Projects</label>
+                                <span class="slider-val-bubble" id="projectsValue">2</span>
+                            </div>
+                            <div class="slider-track-wrapper">
+                                <input type="range" id="projectsSlider" class="slider-input" min="0" max="10" step="1" value="2" oninput="document.getElementById('projectsValue').textContent = this.value">
+                            </div>
+                            <div class="slider-labels">
+                                <span>0 Projects</span>
+                                <span>5 (Strong)</span>
+                                <span>10 (Elite)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Internships Slider (0-5) -->
+                    <div class="form-group">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <label for="internshipsSlider">Internships Completed</label>
+                                <span class="slider-val-bubble" id="internshipsValue">1</span>
+                            </div>
+                            <div class="slider-track-wrapper">
+                                <input type="range" id="internshipsSlider" class="slider-input" min="0" max="5" step="1" value="1" oninput="document.getElementById('internshipsValue').textContent = this.value">
+                            </div>
+                            <div class="slider-labels">
+                                <span>0 Internships</span>
+                                <span>2 (Quality)</span>
+                                <span>5 (Elite)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certifications Slider (0-10) -->
+                    <div class="form-group">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <label for="certsSlider">Certifications Earned</label>
+                                <span class="slider-val-bubble" id="certsValue">1</span>
+                            </div>
+                            <div class="slider-track-wrapper">
+                                <input type="range" id="certsSlider" class="slider-input" min="0" max="10" step="1" value="1" oninput="document.getElementById('certsValue').textContent = this.value">
+                            </div>
+                            <div class="slider-labels">
+                                <span>0 Certs</span>
+                                <span>5 (Standard)</span>
+                                <span>10 (Certified Pro)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Checklist (8 Skills) -->
+                    <div class="form-group">
+                        <label>Technical Core Skills</label>
+                        <div class="tags-grid">
+                            
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="Python">
+                                <div class="tag-label">
+                                    <i class="fa-brands fa-python icon-skill"></i>
+                                    <span>Python</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="SQL">
+                                <div class="tag-label">
+                                    <i class="fa-solid fa-database icon-skill"></i>
+                                    <span>SQL</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="PowerBI">
+                                <div class="tag-label">
+                                    <i class="fa-solid fa-chart-simple icon-skill"></i>
+                                    <span>Power BI</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="Excel">
+                                <div class="tag-label">
+                                    <i class="fa-regular fa-file-excel icon-skill"></i>
+                                    <span>Excel</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="ML">
+                                <div class="tag-label">
+                                    <i class="fa-solid fa-microchip icon-skill"></i>
+                                    <span>ML Core</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="Tableau">
+                                <div class="tag-label">
+                                    <i class="fa-solid fa-chart-pie icon-skill"></i>
+                                    <span>Tableau</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="Java">
+                                <div class="tag-label">
+                                    <i class="fa-brands fa-java icon-skill"></i>
+                                    <span>Java Dev</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                            <label class="tag-checkbox">
+                                <input type="checkbox" name="skills" value="React">
+                                <div class="tag-label">
+                                    <i class="fa-brands fa-react icon-skill"></i>
+                                    <span>React JS</span>
+                                    <i class="fa-solid fa-check icon-check"></i>
+                                </div>
+                            </label>
+
+                        </div>
+                    </div>
+
+                    <!-- Submit CTA -->
+                    <button type="submit" class="btn-predict">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Generate Intelligence Report</span>
+                    </button>
+
+                </form>
+            </section>
+
+            <!-- Right Column: Results & Analytics Output -->
+            <section class="output-column">
+                
+                <!-- Welcome Placeholder Card -->
+                <div class="welcome-placeholder glass-panel" id="welcomeCard">
+                    <div class="welcome-decor">
+                        <i class="fa-solid fa-gem"></i>
+                    </div>
+                    <h2>Analyze Placements Potential</h2>
+                    <p>Our intelligence algorithms analyze student profiles across Indian engineering campus hiring to forecast salary ranges, growth timelines, and gap roadmaps.</p>
+                    
+                    <div class="step-row">
+                        <div class="step-card">
+                            <div class="step-num">1</div>
+                            <div>
+                                <h4>Configure Milestones</h4>
+                                <p>Set projects count, internships, certifications, and CGPA sliders.</p>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-num">2</div>
+                            <div>
+                                <h4>Predict Dashboard</h4>
+                                <p>Unlock 4 KPI metrics, 3 analytics charts, scripts, and our chatbot advisor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Predictive Dashboard View (Initially Hidden) -->
+                <div class="results-view" id="resultsDashboard">
+                    
+                    <!-- Shimmer Loading Overlay -->
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="loading-spinner-wrapper">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <span class="loading-text">Analyzing Placements Matrix...</span>
+                        <span class="loading-subtitle">Applying Heuristics Classification Tree</span>
+                    </div>
+
+                    <!-- Section 2 — KPI Cards (Grid) -->
+                    <div class="kpi-grid">
+                        
+                        <!-- KPI 1: Predicted Salary Range -->
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-label">Predicted Salary</div>
+                            <div class="kpi-value gold-txt" id="lblPredictedSalary">₹0.0 - 0.0</div>
+                            <div class="kpi-desc">Expected starting CTC range in <strong>LPA</strong></div>
+                        </div>
+
+                        <!-- KPI 2: Hire-ability Score -->
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-label">Hire-ability Score</div>
+                            <div class="kpi-value" id="lblHireability">0</div>
+                            <div class="kpi-desc">Profile rank evaluated out of <strong>100 max</strong></div>
+                        </div>
+
+                        <!-- KPI 3: Market Rank Percentile -->
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-label">Market Rank</div>
+                            <div class="kpi-value small-val" id="lblMarketRank">Better than 0%</div>
+                            <div class="kpi-desc">Positioned relative to Indian tech freshers</div>
+                        </div>
+
+                        <!-- KPI 4: Profile Strength Badge -->
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-label">Profile Strength</div>
+                            <div class="kpi-value" style="padding-top: 0.25rem;"><span class="strength-badge weak" id="lblProfileStrength">Weak</span></div>
+                            <div class="kpi-desc">Placement predictability index tier</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Section 3 — Charts Dashboard -->
+                    <div class="charts-grid">
+                        
+                        <!-- Chart 1: horizontal Bar Chart of salary by skill -->
+                        <div class="chart-card glass-panel">
+                            <h3>Skill Market Premium<span>LPA addition per technical core skill asset</span></h3>
+                            <div class="chart-container-wrapper">
+                                <canvas id="skillsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Radar chart of your profile vs top freshers -->
+                        <div class="chart-card glass-panel">
+                            <h3>Profile Radar Benchmark<span>Your performance vs Top 5% hired freshers</span></h3>
+                            <div class="chart-container-wrapper">
+                                <canvas id="radarChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 3: Line chart of salary growth projection (span 2) -->
+                        <div class="chart-card glass-panel chart-card-full">
+                            <h3>5-Year Salary Progression Timeline<span>Estimated growth trajectory of your profile over time</span></h3>
+                            <div class="chart-container-wrapper chart-container-wrapper-large">
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Column panel: Skill Gap (S4) + Negotiation (S6) -->
+                    <div class="mid-panels-grid">
+                        
+                        <!-- Section 4 — Skill Gap Analyzer -->
+                        <div class="gap-card glass-panel">
+                            <div class="chart-card" style="padding:0; margin-bottom: 1.25rem;">
+                                <h3>Targeted Skill Gap Analyzer<span>Acquire these 3 assets to boost your starting bracket</span></h3>
+                            </div>
+                            
+                            <!-- Skill gap lists -->
+                            <div id="gapSkillList">
+                                <!-- Dynamically loaded via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Section 6 — Salary Negotiation script -->
+                        <div class="negotiation-card glass-panel">
+                            <div class="chart-card" style="padding:0; margin-bottom: 1.25rem;">
+                                <h3>Salary Negotiation Guide<span>Custom script constructed based on your assets</span></h3>
+                            </div>
+
+                            <!-- Target numbers -->
+                            <div class="negotiation-figures">
+                                <div class="neg-fig-box">
+                                    <div class="neg-fig-title">Suggested Quote</div>
+                                    <div class="neg-fig-amount" id="negQuote">₹0.00L</div>
+                                </div>
+                                <div class="neg-fig-box">
+                                    <div class="neg-fig-title">Walk-Away</div>
+                                    <div class="neg-fig-amount" id="negWalkaway">₹0.00L</div>
+                                </div>
+                                <div class="neg-fig-box">
+                                    <div class="neg-fig-title">Do Not Accept</div>
+                                    <div class="neg-fig-amount" id="negFloor">₹0.00L</div>
+                                </div>
+                            </div>
+
+                            <!-- Pitch Bubble -->
+                            <div class="speech-bubble-wrapper">
+                                <p class="speech-bubble-text" id="negScriptText">
+                                    "I am seeking a starting package in the range of..."
+                                </p>
+                            </div>
+
+                            <!-- Copy CTA -->
+                            <button class="btn-copy-script" onclick="copyNegotiationScript()">
+                                <i class="fa-regular fa-copy"></i>
+                                <span id="btnCopyLabel">Copy Speech Script</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Section 5 — LinkedIn Career Chatbot Card -->
+                    <div class="chatbot-card glass-panel">
+                        
+                        <!-- Chat Sidebar (Suggestions) -->
+                        <div class="chat-sidebar">
+                            <div class="chat-coach-profile">
+                                <div class="chat-coach-avatar">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </div>
+                                <div class="chat-coach-info">
+                                    <h4>AI Assistant</h4>
+                                    <p>Step into your career with confidence</p>
+                                </div>
+                            </div>
+
+                            <div class="chat-quick-labels">Trending Indian Placement Qs</div>
+                            
+                            <!-- Quick trigger button lists -->
+                            <div class="chat-prebaked-list">
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(0)">How do I negotiate salary?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(1)">Is my CGPA good enough?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(2)">Which skill should I learn first?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(3)">How to write LinkedIn headline?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(4)">Am I underpaid?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(5)">How to apply off-campus in India?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(6)">IIT vs non-IIT salary gap?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(7)">Do internships count as experience?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(8)">Which Indian city pays the highest?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(9)">Are online certifications worth it?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(10)">How many projects are ideal?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(11)">What is a good fresher resume format?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(12)">Is React or Angular better?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(13)">Should I learn Tableau or Power BI?</button>
+                                <button type="button" class="btn-chat-prebaked" onclick="sendPrebakedQuestion(14)">How to break into ML as a fresher?</button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Dialog -->
+                        <div class="chat-main-area">
+                            <div class="chat-messages-container" id="chatMessages">
+                                <div class="chat-msg bot">
+                                    Namaste! Hello <strong>user</strong>, your AI Helper here. Ask me any career, placement, or salary-related questions, or tap any of the trending topics on the left to start!
+                                </div>
+                            </div>
+                            
+                            <!-- Custom Message Input Box -->
+                            <form class="chat-input-wrapper" onsubmit="event.preventDefault(); handleCustomChatMessage();">
+                                <input type="text" id="chatInputBox" class="chat-input" placeholder="Ask about placements, off-campus, CGPA ratios..." autocomplete="off">
+                                
+                                <!-- Chat Voice Button -->
+                                <button type="button" class="btn-chat-mic" id="chatMicBtn" onclick="toggleChatVoice()" title="Type via Voice Command">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                                
+                                <button type="submit" class="btn-chat-send">
+                                    <i class="fa-regular fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ChartJS via CDN for all three canvases -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Main JS Application Logic with Cache Buster -->
+    <script src="app.js?v=2.0.1"></script>
+</body>
+</html>
